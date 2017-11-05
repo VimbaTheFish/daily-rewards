@@ -1,0 +1,26 @@
+group 'ru.skyfire.zeta.omiquests'
+version '0.0.1'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {url 'http://repo.spongepowered.org/Sponge/maven/'}
+}
+
+configurations {
+    included
+    compile.extendsFrom included
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'org.spongepowered:spongeapi:7.0.0-20171014.091016-45'
+    included 'org.xerial:sqlite-jdbc:3.19.3'
+}
