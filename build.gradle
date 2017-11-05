@@ -1,4 +1,4 @@
-group 'ru.skyfire.zeta.omiquests'
+group 'ru.skyfire.zeta.dailyrewards'
 version '0.0.1'
 
 tasks.withType(JavaCompile) {
