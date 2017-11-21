@@ -6,6 +6,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
@@ -59,6 +60,7 @@ public class DailyRewards {
         rewardDeserializer = new RewardDeserializer(rootDefNode);
         initCommands();
         initTranslaitionConfig();
+        Sponge.getEventManager().registerListeners(this, new Listeners());
     }
 
     @Listener
@@ -98,6 +100,10 @@ public class DailyRewards {
         } catch (IOException e) {
             logger.info(e.getMessage());
         }
+    }
+
+    public PluginContainer getPlugin() {
+        return plugin;
     }
 
     private void initCommands(){

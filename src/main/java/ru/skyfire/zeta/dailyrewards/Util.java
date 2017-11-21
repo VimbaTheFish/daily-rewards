@@ -4,13 +4,24 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.property.InventoryCapacity;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.text.Text;
+import ru.skyfire.zeta.dailyrewards.reward.Reward;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.skyfire.zeta.dailyrewards.DailyRewards.logger;
 
@@ -140,5 +151,94 @@ public class Util {
             return "§Translation error!";
         }
         return node.getString().replace("&","§");
+    }
+
+    //compare items ignore quantity
+    private static boolean isItemStacksSimilar(ItemStack a, ItemStack b) {
+        return a != null
+                && b != null
+                && a.getType() == b.getType()
+                && a.get(Keys.ITEM_LORE).equals(b.get(Keys.ITEM_LORE));
+    }
+
+    public static void showRewards(final Player player, final List<Reward> rewards) {
+        //тут создаем ассоциативный массив предмет в инвентаре => награда
+        final Map<ItemStack, Reward> rewardsMap = new LinkedHashMap<>();
+        //считаем размер
+        int inventorySize = (int) (Math.ceil(rewards.size()/7.0) * 9);
+
+        //это заглушки по бокам, инвентарь шириной в 9 ячеек, удобнее его сузить до 7, типа неделя
+        ItemStack stub = ItemStack.of(ItemTypes.GLASS_PANE, 1);
+        stub.offer(Keys.DYE_COLOR, DyeColors.GREEN);
+        stub.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-stub")));
+
+        //создаем архетип инвентаря
+        InventoryArchetype archetype = InventoryArchetype.builder()
+                .property(InventoryCapacity.of(inventorySize))
+                .build("daily-inv", "rewards-inventory-name");
+        //создаем сам инвентарь
+        Inventory inventory = Inventory.builder()
+                .of(archetype)
+                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(trans("rewards-inventory-name"))))
+                .listener(
+                        ClickInventoryEvent.class,
+                        //это листенер самого ивента
+                        e -> {
+                            //обязательно кэнселим его, нам не надо что бы предметы в нем перемещались
+                            e.setCancelled(true);
+                            Player p = e.getCause().first(Player.class).orElse(null);
+                            //тут получаем транзакцию которую попытались совершить
+                            List<SlotTransaction> transactions = e.getTransactions();
+                            Set<ItemStack> keys = rewardsMap.keySet();
+                            //тут ищем сходство в нашем ассоциативном массиве
+                            List<ItemStack> applicableKeys = keys.stream()
+                                    .filter(i -> transactions.stream().anyMatch(t -> isItemStacksSimilar(i, t.getOriginal().createStack())))
+                                    .collect(Collectors.toList());
+                            //если совпадения есть...
+                            if (!applicableKeys.isEmpty()) {
+                                //можем обратиться к нашему объекту и сделать что надо
+                                rewardsMap.get(applicableKeys.get(0)).apply(p);
+                                //Тут мы закрываем инвентарь ЧЕРЕЗ 1 ТИК, иначе предмет остается на курсоре и падает на землю
+                                Sponge.getScheduler()
+                                        .createTaskBuilder()
+                                        .delayTicks(1)
+                                        .execute(r -> player.closeInventory())
+                                        .submit(DailyRewards.getInst());
+                            }
+                        }
+                )
+                .build(DailyRewards.getInst());
+
+        //заполняем ассоциативный массив
+        rewards.forEach(reward -> {
+            //ОБЯЗАТЕЛЬНО везде используем КОПИИ стеков, иначе гроб-гроб
+            ItemStack is = reward.getIcon().copy();
+            is.offer(Keys.DISPLAY_NAME, Text.of(reward.getName()));
+            rewardsMap.put(is, reward);
+        });
+
+        //Ниже хитрый цикл для заполнения инвентаря заглушками и наградами
+        Iterator inventoryIt = inventory.slots().iterator();
+        Iterator rewardsIt = rewardsMap.keySet().iterator();
+        int i = 0;
+        int j = 1;
+        while (inventoryIt.hasNext()) {
+            Slot slot = (Slot) inventoryIt.next();
+            if (i % 9 == 0 || (i - 1) % 9 == 0) {
+                slot.offer(stub.copy());
+            } else {
+                if (rewardsIt.hasNext()) {
+                    ItemStack is = ((ItemStack) rewardsIt.next()).copy();
+                    //А тут ставим количество предмету типа количество дней когда его можно получить
+                    is.setQuantity(j);
+                    j++;
+                    slot.offer(is);
+                }
+            }
+            i++;
+        }
+
+        //Ну и открываем инвентарь
+        player.openInventory(inventory);
     }
 }
