@@ -161,11 +161,15 @@ public class Util {
                 && a.get(Keys.ITEM_LORE).equals(b.get(Keys.ITEM_LORE));
     }
 
-    public static void showRewards(final Player player, final List<Reward> rewards) {
+    public static void showRewards(final Player player) {
+        ConfigurationNode days = DailyRewards.getInst().getRootDefNode().getNode("days");
+        ConfigurationNode tr = DailyRewards.getInst().getRootTranslationNode();
+        Map<String, List<Reward>> rewardMap = DailyRewards.getInst().getRewardDeserializer().rewardMap;
+
         //тут создаем ассоциативный массив предмет в инвентаре => награда
-        final Map<ItemStack, Reward> rewardsMap = new LinkedHashMap<>();
+        final Map<String, ItemStack> iconMap = new LinkedHashMap<>();
         //считаем размер
-        int inventorySize = (int) (Math.ceil(rewards.size()/7.0) * 9);
+        int inventorySize = (int) (Math.ceil(rewardMap.keySet().size()/7.0) * 9);
 
         //это заглушки по бокам, инвентарь шириной в 9 ячеек, удобнее его сузить до 7, типа неделя
         ItemStack stub = ItemStack.of(ItemTypes.GLASS_PANE, 1);
@@ -189,15 +193,19 @@ public class Util {
                             Player p = e.getCause().first(Player.class).orElse(null);
                             //тут получаем транзакцию которую попытались совершить
                             List<SlotTransaction> transactions = e.getTransactions();
-                            Set<ItemStack> keys = rewardsMap.keySet();
+                            Set<String> keys = iconMap.keySet();
                             //тут ищем сходство в нашем ассоциативном массиве
-                            List<ItemStack> applicableKeys = keys.stream()
-                                    .filter(i -> transactions.stream().anyMatch(t -> isItemStacksSimilar(i, t.getOriginal().createStack())))
+                            List<String> applicableKeys = keys.stream()
+                                    .filter(i -> transactions.stream().anyMatch(t -> isItemStacksSimilar(parseItem("minecraft:end_crystal"), t.getOriginal().createStack())))
                                     .collect(Collectors.toList());
                             //если совпадения есть...
                             if (!applicableKeys.isEmpty()) {
                                 //можем обратиться к нашему объекту и сделать что надо
-                                rewardsMap.get(applicableKeys.get(0)).apply(p);
+                                Sponge.getScheduler()
+                                        .createTaskBuilder()
+                                        .delayTicks(2)
+                                        .execute(r -> Sponge.getCommandManager().process(player, "dr take"))
+                                        .submit(DailyRewards.getInst());
                                 //Тут мы закрываем инвентарь ЧЕРЕЗ 1 ТИК, иначе предмет остается на курсоре и падает на землю
                                 Sponge.getScheduler()
                                         .createTaskBuilder()
@@ -209,30 +217,56 @@ public class Util {
                 )
                 .build(DailyRewards.getInst());
 
-        //заполняем ассоциативный массив
-        rewards.forEach(reward -> {
-            //ОБЯЗАТЕЛЬНО везде используем КОПИИ стеков, иначе гроб-гроб
-            ItemStack is = reward.getIcon().copy();
-            is.offer(Keys.DISPLAY_NAME, Text.of(reward.getName()));
-            rewardsMap.put(is, reward);
-        });
+        for (String a : rewardMap.keySet()){
+            ItemStack stack = Util.parseItem(days.getNode(a, "icon", "item").getString("minecraft:diamond"));
+            if (stack != null) {
+                stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!")));
+                List<Text> lore = new ArrayList<>();
+                for (Object b : days.getNode(a, "icon", "lore").getChildrenMap().keySet()){
+                    lore.add(Text.of(b.toString()));
+                }
+                stack.offer(Keys.ITEM_LORE, lore);
+            }
+            iconMap.put(a, stack != null ? stack.copy() : parseItem("minecraft:dirt"));
+        }
+
+        if(DailyRewards.getInst().debug){
+            for(String a : iconMap.keySet()){
+                logger.info("Icon loaded - item - "+iconMap.get(a).getType().getName());
+            }
+        }
 
         //Ниже хитрый цикл для заполнения инвентаря заглушками и наградами
         Iterator inventoryIt = inventory.slots().iterator();
-        Iterator rewardsIt = rewardsMap.keySet().iterator();
-        int i = 0;
+        int i = 1;
         int j = 1;
         while (inventoryIt.hasNext()) {
             Slot slot = (Slot) inventoryIt.next();
             if (i % 9 == 0 || (i - 1) % 9 == 0) {
                 slot.offer(stub.copy());
             } else {
-                if (rewardsIt.hasNext()) {
-                    ItemStack is = ((ItemStack) rewardsIt.next()).copy();
-                    //А тут ставим количество предмету типа количество дней когда его можно получить
-                    is.setQuantity(j);
-                    j++;
-                    slot.offer(is);
+                if (j>iconMap.keySet().size()){
+                    continue;
+                }
+                ItemStack is = iconMap.get(String.valueOf(j));
+                //А тут ставим количество предмету типа количество дней когда его можно получить
+                is.setQuantity(j);
+                slot.offer(is);
+                j++;
+                }
+            i++;
+        }
+
+        i = 0;
+        inventoryIt = inventory.slots().iterator();
+        while (inventoryIt.hasNext()){
+            Slot slot = (Slot) inventoryIt.next();
+            if(i==inventorySize-1){
+                ItemStack stack = parseItem("minecraft:end_crystal");
+                if (stack != null) {
+                    slot.peek();
+                    stack.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-take")));
+                    slot.offer(stack.copy());
                 }
             }
             i++;

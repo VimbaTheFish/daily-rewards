@@ -21,13 +21,14 @@ import ru.skyfire.zeta.dailyrewards.serializers.RewardDeserializer;
 import java.io.IOException;
 import java.nio.file.Path;
 
-@Plugin(id = "dailyrewards", name = "DailyRewards", version = "0.0.1")
+@Plugin(id = "dailyrewards", name = "DailyRewards", version = "1.0.0")
 public class DailyRewards {
     private ConfigurationNode rootDefNode;
     private ConfigurationNode rootTranslationNode;
     private static DailyRewards inst;
     public static Logger logger;
     public boolean debug=false;
+    public boolean hardMode=false;
     private SqliteEntry sqlite;
     private RewardDeserializer rewardDeserializer;
 
@@ -79,6 +80,7 @@ public class DailyRewards {
         try {
             rootDefNode = configLoader.load();
             debug=rootDefNode.getNode("debug").getBoolean();
+            hardMode=rootDefNode.getNode("hardMode").getBoolean();
         } catch (IOException e) {
             logger.info(e.getMessage());
         }

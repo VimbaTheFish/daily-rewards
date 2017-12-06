@@ -33,6 +33,11 @@ public class CmdBuilder {
                 .description(Text.of("Command to clear daily rewards"))
                 .executor(new CmdDailyClear())
                 .build();
+        CommandSpec dailyShow = CommandSpec.builder()
+                .permission("dailyrewards.base")
+                .description(Text.of("Command to show daily rewards"))
+                .executor(new CmdDailyShow())
+                .build();
         CommandSpec dailyReload = CommandSpec.builder()
                 .permission("dailyrewards.admin")
                 .description(Text.of("Command to reload daily rewards"))
@@ -55,6 +60,7 @@ public class CmdBuilder {
                 .child(dailySet, "set")
                 .child(dailyTake, "take")
                 .child(dailyClear, "clear")
+                .child(dailyShow, "show")
                 .child(dailyReload, "reload")
                 .build();
 
