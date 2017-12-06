@@ -223,7 +223,7 @@ public class Util {
                 stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!")));
                 List<Text> lore = new ArrayList<>();
                 for (Object b : days.getNode(a, "icon", "lore").getChildrenMap().keySet()){
-                    lore.add(Text.of(b.toString()));
+                    lore.add(Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(b).getString()));
                 }
                 stack.offer(Keys.ITEM_LORE, lore);
             }
