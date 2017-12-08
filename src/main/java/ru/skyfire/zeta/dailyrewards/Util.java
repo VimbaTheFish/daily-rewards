@@ -163,11 +163,10 @@ public class Util {
 
     public static void showRewards(final Player player) {
         ConfigurationNode days = DailyRewards.getInst().getRootDefNode().getNode("days");
-        ConfigurationNode tr = DailyRewards.getInst().getRootTranslationNode();
         Map<String, List<Reward>> rewardMap = DailyRewards.getInst().getRewardDeserializer().rewardMap;
 
         //тут создаем ассоциативный массив предмет в инвентаре => награда
-        final Map<String, ItemStack> iconMap = new LinkedHashMap<>();
+        final Map<String, ItemStack> iconMap = DailyRewards.getInst().getRewardDeserializer().iconMap;
         //считаем размер
         int inventorySize = (int) (Math.ceil(rewardMap.keySet().size()/7.0) * 9);
 
@@ -217,31 +216,13 @@ public class Util {
                 )
                 .build(DailyRewards.getInst());
 
-        for (String a : rewardMap.keySet()){
-            ItemStack stack = Util.parseItem(days.getNode(a, "icon", "item").getString("minecraft:diamond"));
-            if (stack != null) {
-                stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!")));
-                List<Text> lore = new ArrayList<>();
-                for (Object b : days.getNode(a, "icon", "lore").getChildrenMap().keySet()){
-                    lore.add(Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(b).getString()));
-                }
-                stack.offer(Keys.ITEM_LORE, lore);
-            }
-            iconMap.put(a, stack != null ? stack.copy() : parseItem("minecraft:dirt"));
-        }
-
-        if(DailyRewards.getInst().debug){
-            for(String a : iconMap.keySet()){
-                logger.info("Icon loaded - item - "+iconMap.get(a).getType().getName());
-            }
-        }
-
         //Ниже хитрый цикл для заполнения инвентаря заглушками и наградами
         Iterator inventoryIt = inventory.slots().iterator();
         int i = 1;
         int j = 1;
+        Slot slot = null;
         while (inventoryIt.hasNext()) {
-            Slot slot = (Slot) inventoryIt.next();
+            slot = (Slot) inventoryIt.next();
             if (i % 9 == 0 || (i - 1) % 9 == 0) {
                 slot.offer(stub.copy());
             } else {
@@ -256,20 +237,12 @@ public class Util {
                 }
             i++;
         }
-
-        i = 0;
-        inventoryIt = inventory.slots().iterator();
-        while (inventoryIt.hasNext()){
-            Slot slot = (Slot) inventoryIt.next();
-            if(i==inventorySize-1){
-                ItemStack stack = parseItem("minecraft:end_crystal");
-                if (stack != null) {
-                    slot.peek();
-                    stack.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-take")));
-                    slot.offer(stack.copy());
-                }
-            }
-            i++;
+        if(slot!=null){
+            logger.info("Button!");
+            ItemStack stack = parseItem("minecraft:end_crystal");
+            stack.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-take")));
+            slot.poll();
+            slot.offer(stack.copy());
         }
 
         //Ну и открываем инвентарь

@@ -1,7 +1,9 @@
 package ru.skyfire.zeta.dailyrewards.serializers;
 
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.Text;
 import ru.skyfire.zeta.dailyrewards.DailyRewards;
 import ru.skyfire.zeta.dailyrewards.Util;
 import ru.skyfire.zeta.dailyrewards.reward.CmdReward;
@@ -16,6 +18,7 @@ import static ru.skyfire.zeta.dailyrewards.DailyRewards.logger;
 
 public class RewardDeserializer {
     public Map<String, List<Reward>> rewardMap = new HashMap<>();
+    public Map<String, ItemStack> iconMap = new LinkedHashMap<>();
 
     public RewardDeserializer(ConfigurationNode node) {
         Map<String, List<Reward>> bufRewardMap = new HashMap<>();
@@ -62,9 +65,33 @@ public class RewardDeserializer {
             }
             bufRewardMap.put(n.toString(), list);
         }
+
         rewardMap = bufRewardMap;
+
+        Map<String, ItemStack> bufIconMap = new LinkedHashMap<>();
+        ConfigurationNode days = DailyRewards.getInst().getRootDefNode().getNode("days");
+        for (String a : rewardMap.keySet()){
+            ItemStack stack = Util.parseItem(days.getNode(a, "icon", "item").getString("minecraft:diamond"));
+            if (stack != null) {
+                stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!")));
+                List<Text> lore = new ArrayList<>();
+                for (Object b : days.getNode(a, "icon", "lore").getChildrenMap().keySet()){
+                    lore.add(Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(b).getString()));
+                }
+                stack.offer(Keys.ITEM_LORE, lore);
+            }
+            bufIconMap.put(a, stack != null ? stack.copy() : Util.parseItem("minecraft:dirt"));
+        }
+
+        iconMap = bufIconMap;
+
         if (rewardMap.isEmpty()){
             logger.error("Alarm! There are no rewards in memory! Check config!");
+        }
+        if(DailyRewards.getInst().debug){
+            for(String a : iconMap.keySet()){
+                logger.info("Icon loaded - item - "+iconMap.get(a).getType().getName());
+            }
         }
     }
 }

@@ -53,7 +53,6 @@ public class CmdBuilder {
                 .build();
 
         CommandSpec daily = CommandSpec.builder()
-                .permission("dailyrewards.help")
                 .description(Text.of("Main command"))
                 .executor(new CmdDaily())
                 .child(dailyHelp, "help")
