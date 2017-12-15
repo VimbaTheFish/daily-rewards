@@ -40,7 +40,7 @@ public class CmdDailyTake implements CommandExecutor {
             return  CommandResult.success();
         }
 
-        if (rewards.isEmpty()){
+        if (rewards==null){
             sender.sendMessage(Text.of(Util.trans("command-take-noreward")));
         } else {
             if(!giveReward(player, currDay)){
