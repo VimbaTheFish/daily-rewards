@@ -33,13 +33,14 @@ public class CmdDailyTake implements CommandExecutor {
 
         int currDay = sqlite.getCurrentDay(player.getUniqueId());
         ConfigurationNode currentDay = node.getNode("days", String.valueOf(currDay));
+        List<Reward> rewards = DailyRewards.getInst().getRewardDeserializer().rewardMap.get(String.valueOf(currDay));
 
         if(sqlite.getStatus(player.getUniqueId())==1){
             sender.sendMessage(Text.of(Util.trans("command-take-taken")));
             return  CommandResult.success();
         }
 
-        if (currentDay==null){
+        if (rewards.isEmpty()){
             sender.sendMessage(Text.of(Util.trans("command-take-noreward")));
         } else {
             if(!giveReward(player, currDay)){
