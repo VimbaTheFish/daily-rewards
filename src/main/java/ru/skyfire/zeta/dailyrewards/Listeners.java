@@ -10,8 +10,14 @@ public class Listeners {
     @Listener
     public void onPlayerConnect(ClientConnectionEvent.Join event, @First Player player){
         SqliteEntry sqlite = DailyRewards.getInst().getSqlite();
+        if(!player.hasPermission("dailyrewards.base")){
+            return;
+        }
         if (sqlite.getStatus(player.getUniqueId())==-1){
             sqlite.addEntry(player.getUniqueId(), 1, 0);
+        }
+        if (sqlite.getStatus(player.getUniqueId())==1){
+            return;
         }
         if (sqlite.getStatus(player.getUniqueId())==0){
             Util.showRewards(player);

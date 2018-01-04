@@ -14,6 +14,7 @@ public class CmdDailyReload implements CommandExecutor {
     public CommandResult execute(CommandSource sender, CommandContext args) {
         DailyRewards.getInst().initConfigBase();
         DailyRewards.getInst().initTranslaitionConfig();
+        DailyRewards.getInst().initTimeConfig();
         DailyRewards.getInst().setRewardDeserializer(new RewardDeserializer(DailyRewards.getInst().getRootDefNode()));
         sender.sendMessage(Text.of(Util.trans("command-reload-success")));
         return CommandResult.success();

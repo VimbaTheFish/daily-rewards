@@ -12,6 +12,7 @@ import ru.skyfire.zeta.dailyrewards.Util;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
 import ru.skyfire.zeta.dailyrewards.reward.Reward;
 
+import java.io.IOException;
 import java.util.List;
 
 public class CmdDailyTake implements CommandExecutor {
@@ -25,6 +26,8 @@ public class CmdDailyTake implements CommandExecutor {
 
         SqliteEntry sqlite = DailyRewards.getInst().getSqlite();
         ConfigurationNode node = DailyRewards.getInst().getRootDefNode();
+
+        timeCheck();
 
         if (sqlite.getCurrentDay(player.getUniqueId())<1){
             sender.sendMessage(Text.of(Util.trans("command-take-first")));
@@ -50,7 +53,7 @@ public class CmdDailyTake implements CommandExecutor {
             sender.sendMessage(Text.of(Util.trans("command-take-reward")));
         }
 
-        if(currDay==node.getNode("daycap").getInt()){
+        if(currDay>=node.getNode("daycap").getInt()){
             sqlite.updateEntry(player.getUniqueId(), 1, 1);
         } else {
             sqlite.updateEntry(player.getUniqueId(), currDay+1, 1);
@@ -71,5 +74,30 @@ public class CmdDailyTake implements CommandExecutor {
             a.apply(player);
         }
         return true;
+    }
+
+    private void timeCheck(){
+        ConfigurationNode timeNode = DailyRewards.getInst().getRootTimeNode();
+        double lastDayTime = timeNode.getNode("time").getDouble();
+        double currentTime = System.currentTimeMillis();
+        double oneDay = 24*60*60*1000;
+
+        if(lastDayTime<currentTime-oneDay){
+            int lostDays=0;
+            while (currentTime-oneDay>lastDayTime){
+                lostDays++;
+                lastDayTime=lastDayTime+oneDay;
+            }
+            timeNode.getNode("time").setValue(lastDayTime);
+            try {
+                DailyRewards.getInst().getTimeConfigLoader().save(timeNode);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            DailyRewards.getInst().getSqlite().clearStatuses();
+            if (DailyRewards.getInst().hardMode){
+                DailyRewards.getInst().getSqlite().clearDaysHard();
+            }
+        }
     }
 }

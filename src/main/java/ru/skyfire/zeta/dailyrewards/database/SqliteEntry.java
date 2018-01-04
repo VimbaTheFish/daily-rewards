@@ -150,6 +150,20 @@ public class SqliteEntry {
         }
     }
 
+    public void clearDaysHard(){
+        String sql = "UPDATE " + TABLE_NAME + " SET day = ? WHERE status = ?;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, 1);
+            stmt.setInt(2, 0);
+            if (stmt.executeUpdate()==0){
+                logger.error("All statuses are 0 already!");
+            }
+        } catch (SQLException e) {
+            logSqlError(sql);
+            e.printStackTrace();
+        }
+    }
+
     private void logSqlError(String sql) {
         logger.error("[SQL] Failed to execute: " + sql);
     }

@@ -238,7 +238,6 @@ public class Util {
             i++;
         }
         if(slot!=null){
-            logger.info("Button!");
             ItemStack stack = parseItem("minecraft:end_crystal");
             stack.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-take")));
             slot.poll();

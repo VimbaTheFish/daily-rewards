@@ -21,10 +21,11 @@ import ru.skyfire.zeta.dailyrewards.serializers.RewardDeserializer;
 import java.io.IOException;
 import java.nio.file.Path;
 
-@Plugin(id = "dailyrewards", name = "DailyRewards", version = "1.0.2")
+@Plugin(id = "dailyrewards", name = "DailyRewards", version = "1.1.0")
 public class DailyRewards {
     private ConfigurationNode rootDefNode;
     private ConfigurationNode rootTranslationNode;
+    private ConfigurationNode rootTimeNode;
     private static DailyRewards inst;
     public static Logger logger;
     public boolean debug=false;
@@ -49,6 +50,8 @@ public class DailyRewards {
     @DefaultConfig(sharedRoot = false)
     private Path defaultConfig;
 
+    ConfigurationLoader<CommentedConfigurationNode> timeConfigLoader;
+
     public static DailyRewards getInst() {
         return inst;
     }
@@ -61,6 +64,7 @@ public class DailyRewards {
         rewardDeserializer = new RewardDeserializer(rootDefNode);
         initCommands();
         initTranslaitionConfig();
+        initTimeConfig();
         Sponge.getEventManager().registerListeners(this, new Listeners());
     }
 
@@ -104,6 +108,29 @@ public class DailyRewards {
         }
     }
 
+    public void initTimeConfig() {
+        Path timePath = privateConfigDir.resolve("time.conf");
+        ConfigurationLoader<CommentedConfigurationNode> timeCL = HoconConfigurationLoader.builder().setPath(timePath).build();
+
+        if (!timePath.toFile().exists()) {
+            logger.error("Cannot find time file path");
+            try {
+                plugin.getAsset("time.conf").orElse(null).copyToDirectory(privateConfigDir);
+                CommentedConfigurationNode node = timeCL.load();
+                node.getNode("time").setValue(System.currentTimeMillis());
+                timeCL.save(node);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            rootTimeNode = timeCL.load();
+            timeConfigLoader = timeCL;
+        } catch (IOException e) {
+            logger.info(e.getMessage());
+        }
+    }
+
     public PluginContainer getPlugin() {
         return plugin;
     }
@@ -128,11 +155,23 @@ public class DailyRewards {
         return rootTranslationNode;
     }
 
+    public ConfigurationNode getRootTimeNode() {
+        return rootTimeNode;
+    }
+
+    public void setRootTimeNode(ConfigurationNode rootTimeNode) {
+        this.rootTimeNode = rootTimeNode;
+    }
+
     public RewardDeserializer getRewardDeserializer() {
         return rewardDeserializer;
     }
 
     public void setRewardDeserializer(RewardDeserializer rewardDeserializer) {
         this.rewardDeserializer = rewardDeserializer;
+    }
+
+    public ConfigurationLoader<CommentedConfigurationNode> getTimeConfigLoader() {
+        return timeConfigLoader;
     }
 }
