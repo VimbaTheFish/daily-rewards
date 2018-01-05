@@ -94,10 +94,10 @@ public class CmdDailyTake implements CommandExecutor {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            DailyRewards.getInst().getSqlite().clearStatuses();
             if (DailyRewards.getInst().hardMode){
                 DailyRewards.getInst().getSqlite().clearDaysHard();
             }
+            DailyRewards.getInst().getSqlite().clearStatuses();
         }
     }
 }

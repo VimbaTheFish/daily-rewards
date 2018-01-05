@@ -17,11 +17,10 @@ public class CmdDailyClear implements CommandExecutor {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        DailyRewards.getInst().getSqlite().clearStatuses();
-
         if (DailyRewards.getInst().hardMode){
             DailyRewards.getInst().getSqlite().clearDaysHard();
         }
+        DailyRewards.getInst().getSqlite().clearStatuses();
 
         sender.sendMessage(Text.of("Настал новый день, братья!"));
         return CommandResult.success();
