@@ -146,9 +146,9 @@ public class Util {
             return "Problems with translation config!";
         }
         ConfigurationNode node = rootNode.getNode(nodeName);
-        if (node.getString().isEmpty()){
-            logger.error("Alarm! Cannot read translation file! Check: "+nodeName);
-            return "§Translation error!";
+        if (node.getString()==null){
+            logger.error("Alarm! Cannot read translation file! Check node: "+nodeName);
+            return "§4Translation error! Check node: "+nodeName;
         }
         return node.getString().replace("&","§");
     }

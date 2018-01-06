@@ -10,30 +10,20 @@ import ru.skyfire.zeta.dailyrewards.DailyRewards;
 import ru.skyfire.zeta.dailyrewards.Util;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
 
-public class CmdDailySetStatus implements CommandExecutor {
-    @Override
+public class CmdDailyInfo implements CommandExecutor {
     public CommandResult execute(CommandSource sender, CommandContext args) {
         Player targetPlayer = args.<Player>getOne("player").orElse(null);
-        Boolean targetStatus = args.<Boolean>getOne("status").orElse(null);
-
-        if (targetStatus==null || targetPlayer==null){
-            sender.sendMessage(Text.of(Util.trans("command-set-error")));
-            return CommandResult.success();
-        }
-
-        SqliteEntry sqlite = DailyRewards.getInst().getSqlite();
-
-        if(sqlite.getStatus(targetPlayer.getUniqueId())==-1){
+        if(targetPlayer==null){
             sender.sendMessage(Text.of(Util.trans("command-set-noplayer")));
             return CommandResult.success();
         }
-        int status=0;
-        if(targetStatus){
-            status=1;
+        SqliteEntry sqlite = DailyRewards.getInst().getSqlite();
+        sender.sendMessage(Text.of("Player's next day: "+sqlite.getCurrentDay(targetPlayer.getUniqueId())));
+        if(sqlite.getStatus(targetPlayer.getUniqueId())==1){
+            sender.sendMessage(Text.of("Reward is taken"));
+        } else {
+            sender.sendMessage(Text.of("Reward is NOT taken"));
         }
-
-        sqlite.updateEntry(targetPlayer.getUniqueId(), sqlite.getCurrentDay(targetPlayer.getUniqueId()), status);
-        sender.sendMessage(Text.of(Util.trans("command-set-status-success")+status));
         return CommandResult.success();
     }
 }

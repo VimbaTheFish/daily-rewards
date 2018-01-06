@@ -1,6 +1,7 @@
 package ru.skyfire.zeta.dailyrewards.commands;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
@@ -16,12 +17,22 @@ public class CmdBuilder {
         CommandSpec dailySetDay = CommandSpec.builder()
                 .permission("dailyrewards.admin")
                 .description(Text.of("Set current day for player"))
+                .arguments(GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))),
+                        GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))))
                 .executor(new CmdDailySetDay())
                 .build();
         CommandSpec dailySetStatus = CommandSpec.builder()
                 .permission("dailyrewards.admin")
                 .description(Text.of("Set current status for player"))
+                .arguments(GenericArguments.optionalWeak(GenericArguments.bool(Text.of("status"))),
+                        GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))))
                 .executor(new CmdDailySetStatus())
+                .build();
+        CommandSpec dailyInfo = CommandSpec.builder()
+                .permission("dailyrewards.admin")
+                .description(Text.of("Command to look info about player"))
+                .arguments(GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))))
+                .executor(new CmdDailyInfo())
                 .build();
         CommandSpec dailyTake = CommandSpec.builder()
                 .permission("dailyrewards.base")
@@ -61,6 +72,7 @@ public class CmdBuilder {
                 .child(dailyClear, "clear")
                 .child(dailyShow, "show")
                 .child(dailyReload, "reload")
+                .child(dailyInfo, "info")
                 .build();
 
         Sponge.getCommandManager().register(plugin, daily, "dailyrewards", "daily", "dr");
