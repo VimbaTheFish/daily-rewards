@@ -21,7 +21,7 @@ import ru.skyfire.zeta.dailyrewards.serializers.RewardDeserializer;
 import java.io.IOException;
 import java.nio.file.Path;
 
-@Plugin(id = "dailyrewards", name = "DailyRewards", version = "1.1.2")
+@Plugin(id = "dailyrewards", name = "DailyRewards", version = "1.1.3")
 public class DailyRewards {
     private ConfigurationNode rootDefNode;
     private ConfigurationNode rootTranslationNode;
