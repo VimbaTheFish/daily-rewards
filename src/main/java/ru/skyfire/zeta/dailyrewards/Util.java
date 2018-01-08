@@ -165,47 +165,35 @@ public class Util {
         ConfigurationNode days = DailyRewards.getInst().getRootDefNode().getNode("days");
         Map<String, List<Reward>> rewardMap = DailyRewards.getInst().getRewardDeserializer().rewardMap;
 
-        //тут создаем ассоциативный массив предмет в инвентаре => награда
         final Map<String, ItemStack> iconMap = DailyRewards.getInst().getRewardDeserializer().iconMap;
-        //считаем размер
         int inventorySize = (int) (Math.ceil(rewardMap.keySet().size()/7.0) * 9);
 
-        //это заглушки по бокам, инвентарь шириной в 9 ячеек, удобнее его сузить до 7, типа неделя
         ItemStack stub = ItemStack.of(ItemTypes.GLASS_PANE, 1);
         stub.offer(Keys.DYE_COLOR, DyeColors.GREEN);
         stub.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-stub")));
 
-        //создаем архетип инвентаря
         InventoryArchetype archetype = InventoryArchetype.builder()
                 .property(InventoryCapacity.of(inventorySize))
                 .build("daily-inv", "rewards-inventory-name");
-        //создаем сам инвентарь
         Inventory inventory = Inventory.builder()
                 .of(archetype)
                 .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(trans("rewards-inventory-name"))))
                 .listener(
                         ClickInventoryEvent.class,
-                        //это листенер самого ивента
                         e -> {
-                            //обязательно кэнселим его, нам не надо что бы предметы в нем перемещались
                             e.setCancelled(true);
                             Player p = e.getCause().first(Player.class).orElse(null);
-                            //тут получаем транзакцию которую попытались совершить
                             List<SlotTransaction> transactions = e.getTransactions();
                             Set<String> keys = iconMap.keySet();
-                            //тут ищем сходство в нашем ассоциативном массиве
                             List<String> applicableKeys = keys.stream()
                                     .filter(i -> transactions.stream().anyMatch(t -> isItemStacksSimilar(parseItem("minecraft:end_crystal"), t.getOriginal().createStack())))
                                     .collect(Collectors.toList());
-                            //если совпадения есть...
                             if (!applicableKeys.isEmpty()) {
-                                //можем обратиться к нашему объекту и сделать что надо
                                 Sponge.getScheduler()
                                         .createTaskBuilder()
                                         .delayTicks(2)
                                         .execute(r -> Sponge.getCommandManager().process(player, "dr take"))
                                         .submit(DailyRewards.getInst());
-                                //Тут мы закрываем инвентарь ЧЕРЕЗ 1 ТИК, иначе предмет остается на курсоре и падает на землю
                                 Sponge.getScheduler()
                                         .createTaskBuilder()
                                         .delayTicks(1)
@@ -216,7 +204,6 @@ public class Util {
                 )
                 .build(DailyRewards.getInst());
 
-        //Ниже хитрый цикл для заполнения инвентаря заглушками и наградами
         Iterator inventoryIt = inventory.slots().iterator();
         int i = 1;
         int j = 1;
@@ -230,7 +217,6 @@ public class Util {
                     continue;
                 }
                 ItemStack is = iconMap.get(String.valueOf(j));
-                //А тут ставим количество предмету типа количество дней когда его можно получить
                 is.setQuantity(j);
                 slot.offer(is);
                 j++;
@@ -244,7 +230,6 @@ public class Util {
             slot.offer(stack.copy());
         }
 
-        //Ну и открываем инвентарь
         player.openInventory(inventory);
     }
 }

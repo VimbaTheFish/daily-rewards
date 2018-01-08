@@ -32,6 +32,7 @@ public class DailyRewards {
     public boolean hardMode=false;
     private SqliteEntry sqlite;
     private RewardDeserializer rewardDeserializer;
+    private NotificationManager notificationManager;
 
     @Inject
     private PluginContainer plugin;
@@ -173,5 +174,9 @@ public class DailyRewards {
 
     public ConfigurationLoader<CommentedConfigurationNode> getTimeConfigLoader() {
         return timeConfigLoader;
+    }
+
+    public NotificationManager getNotificationManager() {
+        return notificationManager;
     }
 }
