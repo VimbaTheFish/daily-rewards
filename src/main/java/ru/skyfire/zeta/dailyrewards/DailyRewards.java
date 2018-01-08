@@ -51,7 +51,7 @@ public class DailyRewards {
     @DefaultConfig(sharedRoot = false)
     private Path defaultConfig;
 
-    ConfigurationLoader<CommentedConfigurationNode> timeConfigLoader;
+    private ConfigurationLoader<CommentedConfigurationNode> timeConfigLoader;
 
     public static DailyRewards getInst() {
         return inst;
@@ -63,6 +63,7 @@ public class DailyRewards {
         initConfigBase();
         sqlite = new SqliteEntry();
         rewardDeserializer = new RewardDeserializer(rootDefNode);
+        notificationManager = new NotificationManager();
         initCommands();
         initTranslaitionConfig();
         initTimeConfig();
@@ -102,8 +103,7 @@ public class DailyRewards {
             }
         }
         try {
-            CommentedConfigurationNode node = HoconConfigurationLoader.builder().setPath(translationPath).build().load();
-            rootTranslationNode = node;
+            rootTranslationNode = HoconConfigurationLoader.builder().setPath(translationPath).build().load();
         } catch (IOException e) {
             logger.info(e.getMessage());
         }
