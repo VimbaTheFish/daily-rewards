@@ -75,8 +75,10 @@ public class RewardDeserializer {
             if (stack != null) {
                 stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!").replace("&","§")));
                 List<Text> lore = new ArrayList<>();
+                int q=0;
                 for (Object b : days.getNode(a, "icon", "lore").getChildrenMap().keySet()){
-                    lore.add(Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(b).getString().replace("&","§")));
+                    lore.add(q, Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(String.valueOf(q+1)).getString().replace("&","§")));
+                    q++;
                 }
                 stack.offer(Keys.ITEM_LORE, lore);
             }
