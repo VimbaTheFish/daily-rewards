@@ -73,10 +73,10 @@ public class RewardDeserializer {
         for (String a : rewardMap.keySet()){
             ItemStack stack = Util.parseItem(days.getNode(a, "icon", "item").getString("minecraft:diamond"));
             if (stack != null) {
-                stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!")));
+                stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!").replace("&","§")));
                 List<Text> lore = new ArrayList<>();
                 for (Object b : days.getNode(a, "icon", "lore").getChildrenMap().keySet()){
-                    lore.add(Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(b).getString()));
+                    lore.add(Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(b).getString().replace("&","§")));
                 }
                 stack.offer(Keys.ITEM_LORE, lore);
             }
