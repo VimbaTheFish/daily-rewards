@@ -2,6 +2,7 @@ package ru.skyfire.zeta.dailyrewards;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -60,6 +61,7 @@ class Notificator implements Runnable{
             return;
         }
         player.sendMessage(Text.of(Util.trans("rewards-notification")));
+        player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 100);
         tryAmount--;
         if (tryAmount<=0){
             DailyRewards.getInst().getNotificationManager().removePlayer(player);

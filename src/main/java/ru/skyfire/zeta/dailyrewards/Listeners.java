@@ -1,14 +1,10 @@
 package ru.skyfire.zeta.dailyrewards;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.text.Text;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
-
-import java.util.concurrent.TimeUnit;
 
 public class Listeners {
     @Listener
