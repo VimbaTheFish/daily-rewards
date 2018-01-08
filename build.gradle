@@ -1,5 +1,5 @@
 group 'ru.skyfire.zeta.dailyrewards'
-version '1.1.3'
+version 'api6-1.1.3'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -21,6 +21,6 @@ configurations {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile 'org.spongepowered:spongeapi:7.0.0-20171014.091016-45'
+    compile 'org.spongepowered:spongeapi:6.1.0-20170814.171949-4'
     included 'org.xerial:sqlite-jdbc:3.19.3'
 }

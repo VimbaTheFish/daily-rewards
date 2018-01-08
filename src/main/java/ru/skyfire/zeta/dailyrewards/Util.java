@@ -7,6 +7,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -48,7 +49,7 @@ public class Util {
             }
             int itemMeta = (int) itemStack.toContainer().get(DataQuery.of("UnsafeDamage")).orElse(0);
             int slotMeta = (int) slotStack.toContainer().get(DataQuery.of("UnsafeDamage")).orElse(0);
-            if (!(itemStack.getType() == slotStack.getType() && itemMeta==slotMeta)) {
+            if (!(itemStack.getItem() == slotStack.getItem() && itemMeta==slotMeta)) {
                 continue;
             }
 
@@ -157,7 +158,7 @@ public class Util {
     private static boolean isItemStacksSimilar(ItemStack a, ItemStack b) {
         return a != null
                 && b != null
-                && a.getType() == b.getType()
+                && a.getItem() == b.getItem()
                 && a.get(Keys.ITEM_LORE).equals(b.get(Keys.ITEM_LORE));
     }
 
@@ -197,7 +198,7 @@ public class Util {
                                 Sponge.getScheduler()
                                         .createTaskBuilder()
                                         .delayTicks(1)
-                                        .execute(r -> player.closeInventory())
+                                        .execute(r -> player.closeInventory(Cause.source(DailyRewards.getInst()).build()))
                                         .submit(DailyRewards.getInst());
                             }
                         }
@@ -230,6 +231,6 @@ public class Util {
             slot.offer(stack.copy());
         }
 
-        player.openInventory(inventory);
+        player.openInventory(inventory, Cause.source(DailyRewards.getInst()).build());
     }
 }

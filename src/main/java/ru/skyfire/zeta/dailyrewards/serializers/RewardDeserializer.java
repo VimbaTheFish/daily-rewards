@@ -90,7 +90,7 @@ public class RewardDeserializer {
         }
         if(DailyRewards.getInst().debug){
             for(String a : iconMap.keySet()){
-                logger.info("Icon loaded - item - "+iconMap.get(a).getType().getName());
+                logger.info("Icon loaded - item - "+iconMap.get(a).getItem().getName());
             }
         }
     }

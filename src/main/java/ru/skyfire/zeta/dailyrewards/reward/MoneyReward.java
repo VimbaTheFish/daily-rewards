@@ -3,7 +3,6 @@ package ru.skyfire.zeta.dailyrewards.reward;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.economy.account.UniqueAccount;
@@ -56,7 +55,7 @@ public class MoneyReward extends Reward {
         BigDecimal money = this.amount;
         Currency curr = eco.getDefaultCurrency();
         UniqueAccount account = eco.getOrCreateAccount(player.getUniqueId()).get();
-        account.deposit(curr, money, Cause.of(EventContext.builder().build(), DailyRewards.getInst()));
+        account.deposit(curr, money, Cause.source(DailyRewards.getInst()).build());
         player.sendMessage(Text.of(TextColors.AQUA, Text.of("Ежедневная награда: "+getAmount())));
     }
 }
