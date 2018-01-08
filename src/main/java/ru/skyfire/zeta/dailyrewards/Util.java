@@ -162,11 +162,8 @@ public class Util {
     }
 
     public static void showRewards(final Player player) {
-        ConfigurationNode days = DailyRewards.getInst().getRootDefNode().getNode("days");
-        Map<String, List<Reward>> rewardMap = DailyRewards.getInst().getRewardDeserializer().rewardMap;
-
         final Map<String, ItemStack> iconMap = DailyRewards.getInst().getRewardDeserializer().iconMap;
-        int inventorySize = (int) (Math.ceil(rewardMap.keySet().size()/7.0) * 9);
+        int inventorySize = (int) (Math.ceil(DailyRewards.getInst().getRootDefNode().getNode("daycap").getInt()/7.0) * 9);
 
         ItemStack stub = ItemStack.of(ItemTypes.GLASS_PANE, 1);
         stub.offer(Keys.DYE_COLOR, DyeColors.GREEN);
@@ -213,14 +210,15 @@ public class Util {
             if (i % 9 == 0 || (i - 1) % 9 == 0) {
                 slot.offer(stub.copy());
             } else {
-                if (j>iconMap.keySet().size()){
-                    continue;
+                if (iconMap.get(String.valueOf(j)) == null) {
+                    j++;
+                } else {
+                    ItemStack is = iconMap.get(String.valueOf(j));
+                    is.setQuantity(j);
+                    slot.offer(is);
+                    j++;
                 }
-                ItemStack is = iconMap.get(String.valueOf(j));
-                is.setQuantity(j);
-                slot.offer(is);
-                j++;
-                }
+            }
             i++;
         }
         if(slot!=null){
