@@ -10,6 +10,8 @@ import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
 
 import java.util.concurrent.TimeUnit;
 
+import static ru.skyfire.zeta.dailyrewards.DailyRewards.logger;
+
 public class Listeners {
     @Listener
     public void onPlayerConnect(ClientConnectionEvent.Join event, @First Player player){
@@ -32,6 +34,9 @@ public class Listeners {
 
         if(DailyRewards.getInst().getRootDefNode().getNode("messages-amount").getInt(0)>0){
             DailyRewards.getInst().getNotificationManager().addPlayer(player);
+            if (DailyRewards.getInst().debug){
+                logger.info("Notification for player "+player.getName()+" started");
+            }
         }
     }
     @Listener
