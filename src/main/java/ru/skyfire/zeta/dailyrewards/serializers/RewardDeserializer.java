@@ -71,7 +71,7 @@ public class RewardDeserializer {
         Map<String, ItemStack> bufIconMap = new LinkedHashMap<>();
         ConfigurationNode days = DailyRewards.getInst().getRootDefNode().getNode("days");
         for (String a : rewardMap.keySet()){
-            ItemStack stack = Util.parseItem(days.getNode(a, "icon", "item").getString("minecraft:diamond"));
+            ItemStack stack = Util.parseItem(days.getNode(a, "icon", "item").getString());
             if (stack != null) {
                 stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!").replace("&","§")));
                 List<Text> lore = new ArrayList<>();
