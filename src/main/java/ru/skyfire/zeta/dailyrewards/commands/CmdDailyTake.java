@@ -7,6 +7,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import ru.skyfire.zeta.dailyrewards.DailyRewards;
 import ru.skyfire.zeta.dailyrewards.Util;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
@@ -49,6 +50,10 @@ public class CmdDailyTake implements CommandExecutor {
             if(!giveReward(player, currDay)){
                 player.sendMessage(Text.of(Util.trans("command-take-fail")));
                 return CommandResult.success();
+            }
+            if(currentDay.getNode("reward-message")!=null){
+                sender.sendMessage(TextSerializers.FORMATTING_CODE
+                        .deserialize(currentDay.getNode("reward-message").getString()));
             }
             sender.sendMessage(Text.of(Util.trans("command-take-reward")));
         }
