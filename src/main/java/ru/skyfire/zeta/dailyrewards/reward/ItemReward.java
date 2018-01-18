@@ -32,8 +32,7 @@ public class ItemReward extends Reward {
     }
 
     private int count(Player player){
-        PlayerInventory inv = player.getInventory().query(PlayerInventory.class);
-        return Util.getFreeSlots(inv.getHotbar()) + Util.getFreeSlots(inv.getMain());
+        return Util.getFreeSlotsPlayer(player);
     }
 
     @Override
@@ -44,10 +43,6 @@ public class ItemReward extends Reward {
 
     @Override
     public void apply(Player player) {
-        PlayerInventory inv = player.getInventory().query(PlayerInventory.class);
-        int buf = Util.giveItemToInventory(inv.getHotbar(), this.itemStack, this.amount);
-        if (buf > 0) {
-            Util.giveItemToInventory(inv.getMain(), this.itemStack, buf);
-        }
+        Util.giveItemToPlayer(player, itemStack, amount);
     }
 }

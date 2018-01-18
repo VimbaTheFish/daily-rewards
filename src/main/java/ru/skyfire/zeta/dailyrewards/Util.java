@@ -14,8 +14,10 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.text.Text;
 import ru.skyfire.zeta.dailyrewards.reward.Reward;
@@ -51,7 +53,6 @@ public class Util {
             if (!(itemStack.getType() == slotStack.getType() && itemMeta==slotMeta)) {
                 continue;
             }
-
             int add = slotStack.getMaxStackQuantity() - slotStack.getQuantity();
             if (bufamount > add) {
                 bufamount = bufamount - add;
@@ -62,11 +63,21 @@ public class Util {
                 int bufquant = slotStack.getQuantity() + bufamount;
                 slotStack.setQuantity(bufquant);
                 slot.poll();
-                slot.offer(slotStack);
+                slot.offer(slotStack.copy());
+                bufamount = 0 ;
                 break;
             }
         }
         return bufamount;
+    }
+
+    public static int giveItemToPlayer(Player player, ItemStack itemStack, int amount){
+        PlayerInventory inv = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        int buf = Util.giveItemToInventory(inv.getHotbar(), itemStack, amount);
+        if (buf > 0) {
+            Util.giveItemToInventory(inv.getMain(), itemStack, buf);
+        }
+        return buf;
     }
 
 
@@ -79,6 +90,11 @@ public class Util {
             }
         }
         return res;
+    }
+
+    public static int getFreeSlotsPlayer(Player player){
+        PlayerInventory inv = player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(PlayerInventory.class));
+        return Util.getFreeSlots(inv.getHotbar()) + Util.getFreeSlots(inv.getMain());
     }
 
     public static ItemStack parseItem(String text) {
@@ -125,18 +141,9 @@ public class Util {
     }
 
     public static String cmdParser(String text, Player player){
-        StringBuilder cmd = new StringBuilder();
-        String[] parts = text.split(" ");
-        for (String part : parts) {
-            if (part.startsWith("<") && part.endsWith(">")) {
-                switch (part) {
-                    case "<player>":
-                        part = part.replace(part, player.getName());
-                }
-            }
-            cmd.append(" ").append(part);
-        }
-        return cmd.substring(1);
+        String cmd;
+        cmd=text.replace("<player>", player.getName());
+        return cmd;
     }
 
     public static String trans(String nodeName){
@@ -153,7 +160,6 @@ public class Util {
         return node.getString().replace("&","§");
     }
 
-    //compare items ignore quantity
     private static boolean isItemStacksSimilar(ItemStack a, ItemStack b) {
         return a != null
                 && b != null
