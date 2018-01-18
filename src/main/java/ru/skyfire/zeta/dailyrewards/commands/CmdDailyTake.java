@@ -51,9 +51,8 @@ public class CmdDailyTake implements CommandExecutor {
                 player.sendMessage(Text.of(Util.trans("command-take-fail")));
                 return CommandResult.success();
             }
-            if(currentDay.getNode("reward-message")!=null){
-                sender.sendMessage(TextSerializers.FORMATTING_CODE
-                        .deserialize(currentDay.getNode("reward-message").getString()));
+            if(currentDay.getNode("reward-message").getString()!=null){
+                sender.sendMessage(Text.of(currentDay.getNode("reward-message").getString().replace("&", "§")));
             }
             sender.sendMessage(Text.of(Util.trans("command-take-reward")));
         }
