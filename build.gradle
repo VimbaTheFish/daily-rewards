@@ -1,5 +1,5 @@
 group 'ru.skyfire.zeta.dailyrewards'
-version 'api7-1.2.1'
+version 'api7-1.2.2'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
