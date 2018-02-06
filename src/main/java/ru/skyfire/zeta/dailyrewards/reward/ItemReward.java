@@ -2,9 +2,9 @@ package ru.skyfire.zeta.dailyrewards.reward;
 
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.entity.PlayerInventory;
-import ru.skyfire.zeta.dailyrewards.Util;
-import ru.skyfire.zeta.dailyrewards.reward.Reward;
+
+import static ru.skyfire.zeta.dailyrewards.util.ItemUtil.getFreeSlotsPlayer;
+import static ru.skyfire.zeta.dailyrewards.util.ItemUtil.giveItemToPlayer;
 
 public class ItemReward extends Reward {
     ItemStack itemStack;
@@ -32,7 +32,7 @@ public class ItemReward extends Reward {
     }
 
     private int count(Player player){
-        return Util.getFreeSlotsPlayer(player);
+        return getFreeSlotsPlayer(player);
     }
 
     @Override
@@ -43,6 +43,6 @@ public class ItemReward extends Reward {
 
     @Override
     public void apply(Player player) {
-        Util.giveItemToPlayer(player, itemStack, amount);
+        giveItemToPlayer(player, itemStack, amount);
     }
 }

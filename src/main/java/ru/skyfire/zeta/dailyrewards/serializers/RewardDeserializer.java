@@ -5,7 +5,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import ru.skyfire.zeta.dailyrewards.DailyRewards;
-import ru.skyfire.zeta.dailyrewards.Util;
 import ru.skyfire.zeta.dailyrewards.reward.CmdReward;
 import ru.skyfire.zeta.dailyrewards.reward.ItemReward;
 import ru.skyfire.zeta.dailyrewards.reward.MoneyReward;
@@ -15,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static ru.skyfire.zeta.dailyrewards.DailyRewards.logger;
+import static ru.skyfire.zeta.dailyrewards.util.ItemUtil.parseItem;
 
 public class RewardDeserializer {
     public Map<String, List<Reward>> rewardMap = new HashMap<>();
@@ -34,7 +34,7 @@ public class RewardDeserializer {
                 switch (spl[0]) {
                     case "ITEM":
                         int amount = Integer.valueOf(spl[2]);
-                        ItemStack stack = Util.parseItem(spl[1]);
+                        ItemStack stack = parseItem(spl[1]);
                         list.add(new ItemReward(stack, amount));
                         if (DailyRewards.getInst().debug) {
                             logger.info("ITEM reward " + spl[1] + " " + spl[2] + " is finished.");
@@ -71,7 +71,7 @@ public class RewardDeserializer {
         Map<String, ItemStack> bufIconMap = new LinkedHashMap<>();
         ConfigurationNode days = DailyRewards.getInst().getRootDefNode().getNode("days");
         for (String a : rewardMap.keySet()){
-            ItemStack stack = Util.parseItem(days.getNode(a, "icon", "item").getString());
+            ItemStack stack = parseItem(days.getNode(a, "icon", "item").getString());
             if (stack != null) {
                 stack.offer(Keys.DISPLAY_NAME, Text.of(days.getNode(a, "icon", "name").getString("Awesame Day!").replace("&","§")));
                 List<Text> lore = new ArrayList<>();
@@ -82,7 +82,7 @@ public class RewardDeserializer {
                 }
                 stack.offer(Keys.ITEM_LORE, lore);
             }
-            bufIconMap.put(a, stack != null ? stack.copy() : Util.parseItem("minecraft:dirt"));
+            bufIconMap.put(a, stack != null ? stack.copy() : parseItem("minecraft:dirt"));
         }
 
         iconMap = bufIconMap;

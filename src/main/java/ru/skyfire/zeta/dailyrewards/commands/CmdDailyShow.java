@@ -6,15 +6,17 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import ru.skyfire.zeta.dailyrewards.Util;
+import ru.skyfire.zeta.dailyrewards.util.GuiUtil;
+
+import static ru.skyfire.zeta.dailyrewards.util.TextUtil.trans;
 
 public class CmdDailyShow implements CommandExecutor {
     public CommandResult execute(CommandSource sender, CommandContext args) {
         if (!(sender instanceof Player)){
-            sender.sendMessage(Text.of(Util.trans("command-playeronly")));
+            sender.sendMessage(trans("command-playeronly"));
             return CommandResult.success();
         }
-        Util.showRewards((Player) sender);
+        GuiUtil.showRewards((Player) sender);
         return CommandResult.success();
     }
 }

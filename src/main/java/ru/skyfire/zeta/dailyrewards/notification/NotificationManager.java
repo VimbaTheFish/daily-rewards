@@ -1,17 +1,18 @@
-package ru.skyfire.zeta.dailyrewards;
+package ru.skyfire.zeta.dailyrewards.notification;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
+import ru.skyfire.zeta.dailyrewards.DailyRewards;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static ru.skyfire.zeta.dailyrewards.util.TextUtil.trans;
 
 public class NotificationManager {
     private int time;
@@ -61,7 +62,7 @@ class Notificator implements Runnable{
             DailyRewards.getInst().getNotificationManager().removePlayer(player);
             return;
         }
-        player.sendMessage(Text.of(Util.trans("rewards-notification")));
+        player.sendMessage(trans("rewards-notification"));
         player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 100);
         tryAmount--;
         if (tryAmount<=0){

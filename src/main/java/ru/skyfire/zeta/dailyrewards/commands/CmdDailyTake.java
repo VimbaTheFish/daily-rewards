@@ -7,20 +7,20 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import ru.skyfire.zeta.dailyrewards.DailyRewards;
-import ru.skyfire.zeta.dailyrewards.Util;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
 import ru.skyfire.zeta.dailyrewards.reward.Reward;
+import ru.skyfire.zeta.dailyrewards.util.TimeUtil;
 
-import java.io.IOException;
 import java.util.List;
+
+import static ru.skyfire.zeta.dailyrewards.util.TextUtil.trans;
 
 public class CmdDailyTake implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource sender, CommandContext args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(Text.of(Util.trans("command-playeronly")));
+            sender.sendMessage(trans("command-playeronly"));
             return CommandResult.success();
         }
         Player player = (Player) sender;
@@ -28,10 +28,10 @@ public class CmdDailyTake implements CommandExecutor {
         SqliteEntry sqlite = DailyRewards.getInst().getSqlite();
         ConfigurationNode node = DailyRewards.getInst().getRootDefNode();
 
-        timeCheck();
+        TimeUtil.timeCheck();
 
         if (sqlite.getCurrentDay(player.getUniqueId())<1){
-            sender.sendMessage(Text.of(Util.trans("command-take-first")));
+            sender.sendMessage(trans("command-take-first"));
             sqlite.addEntry(player.getUniqueId(), 1, 0);
         }
 
@@ -40,21 +40,21 @@ public class CmdDailyTake implements CommandExecutor {
         List<Reward> rewards = DailyRewards.getInst().getRewardDeserializer().rewardMap.get(String.valueOf(currDay));
 
         if(sqlite.getStatus(player.getUniqueId())==1){
-            sender.sendMessage(Text.of(Util.trans("command-take-taken")));
+            sender.sendMessage(trans("command-take-taken"));
             return  CommandResult.success();
         }
 
         if (rewards==null){
-            sender.sendMessage(Text.of(Util.trans("command-take-noreward")));
+            sender.sendMessage(trans("command-take-noreward"));
         } else {
             if(!giveReward(player, currDay)){
-                player.sendMessage(Text.of(Util.trans("command-take-fail")));
+                player.sendMessage(trans("command-take-fail"));
                 return CommandResult.success();
             }
             if(currentDay.getNode("reward-message").getString()!=null){
                 sender.sendMessage(Text.of(currentDay.getNode("reward-message").getString().replace("&", "§")));
             }
-            sender.sendMessage(Text.of(Util.trans("command-take-reward")));
+            sender.sendMessage(trans("command-take-reward"));
         }
 
         if(currDay>=node.getNode("daycap").getInt()){
@@ -62,7 +62,8 @@ public class CmdDailyTake implements CommandExecutor {
         } else {
             sqlite.updateEntry(player.getUniqueId(), currDay+1, 1);
         }
-        sender.sendMessage(Text.of(Util.trans("command-take-currentday")+" "+currDay));
+        sender.sendMessage(trans("command-take-currentday").toBuilder()
+        .append(Text.of(" "+currDay)).build());
 
         return CommandResult.success();
     }
@@ -78,30 +79,5 @@ public class CmdDailyTake implements CommandExecutor {
             a.apply(player);
         }
         return true;
-    }
-
-    private void timeCheck(){
-        ConfigurationNode timeNode = DailyRewards.getInst().getRootTimeNode();
-        double lastDayTime = timeNode.getNode("time").getDouble();
-        double currentTime = System.currentTimeMillis();
-        double oneDay = 24*60*60*1000;
-
-        if(lastDayTime<currentTime-oneDay){
-            int lostDays=0;
-            while (currentTime-oneDay>lastDayTime){
-                lostDays++;
-                lastDayTime=lastDayTime+oneDay;
-            }
-            timeNode.getNode("time").setValue(lastDayTime);
-            try {
-                DailyRewards.getInst().getTimeConfigLoader().save(timeNode);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (DailyRewards.getInst().hardMode){
-                DailyRewards.getInst().getSqlite().clearDaysHard();
-            }
-            DailyRewards.getInst().getSqlite().clearStatuses();
-        }
     }
 }

@@ -1,18 +1,23 @@
-package ru.skyfire.zeta.dailyrewards;
+package ru.skyfire.zeta.dailyrewards.listeners;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.text.Text;
+import ru.skyfire.zeta.dailyrewards.DailyRewards;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
-
-import java.util.concurrent.TimeUnit;
+import ru.skyfire.zeta.dailyrewards.util.GuiUtil;
 
 import static ru.skyfire.zeta.dailyrewards.DailyRewards.logger;
 
 public class Listeners {
+    @Listener
+    public void onServerStart(GameStartedServerEvent event){
+        logger.info("DailyRewards is loaded!");
+    }
+
     @Listener
     public void onPlayerConnect(ClientConnectionEvent.Join event, @First Player player){
 
@@ -28,7 +33,7 @@ public class Listeners {
         }
         if (DailyRewards.getInst().getRootDefNode().getNode("show-rewards-on-join").getBoolean(true)){
             if (sqlite.getStatus(player.getUniqueId())==0 && player.hasPermission("dailyrewards.base")){
-                Util.showRewards(player);
+                GuiUtil.showRewards(player);
             }
         }
 
@@ -39,8 +44,15 @@ public class Listeners {
             }
         }
     }
+
     @Listener
     public void onPlayerExit(ClientConnectionEvent.Disconnect event, @First Player player){
         DailyRewards.getInst().getNotificationManager().removePlayer(player);
     }
+
+    @Listener
+    public void onServerClose(GameStoppingServerEvent event){
+        logger.info("DailyRewards was unloaded!");
+    }
+
 }

@@ -7,14 +7,15 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import ru.skyfire.zeta.dailyrewards.DailyRewards;
-import ru.skyfire.zeta.dailyrewards.Util;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
+
+import static ru.skyfire.zeta.dailyrewards.util.TextUtil.trans;
 
 public class CmdDailyInfo implements CommandExecutor {
     public CommandResult execute(CommandSource sender, CommandContext args) {
         Player targetPlayer = args.<Player>getOne("player").orElse(null);
         if(targetPlayer==null){
-            sender.sendMessage(Text.of(Util.trans("command-set-noplayer")));
+            sender.sendMessage(trans("command-set-noplayer"));
             return CommandResult.success();
         }
         SqliteEntry sqlite = DailyRewards.getInst().getSqlite();

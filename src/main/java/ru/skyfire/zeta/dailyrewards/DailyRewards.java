@@ -16,6 +16,8 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import ru.skyfire.zeta.dailyrewards.commands.CmdBuilder;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
+import ru.skyfire.zeta.dailyrewards.listeners.Listeners;
+import ru.skyfire.zeta.dailyrewards.notification.NotificationManager;
 import ru.skyfire.zeta.dailyrewards.serializers.RewardDeserializer;
 
 import java.io.IOException;
