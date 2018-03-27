@@ -194,6 +194,6 @@ public class ItemUtil {
     }
 
     public static boolean isItemStacksSimilar(ItemStack stack1, ItemStack stack2){
-        return false;
+        return stack1.getType().equals(stack2.getType());
     }
 }

@@ -2,6 +2,7 @@ package ru.skyfire.zeta.dailyrewards.util;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.entity.living.player.Player;
@@ -31,11 +32,15 @@ public class GuiUtil {
     public static void showRewards(final Player player) {
         final Map<String, ItemStack> iconMap = DailyRewards.getInst().getRewardDeserializer().iconMap;
         ConfigurationNode rootNode = DailyRewards.getInst().getRootDefNode();
-        int inventorySize = (int) (Math.ceil(rootNode.getNode("daycap").getInt()/7.0) * 9);
+        int inventorySize = (int) ((Math.ceil(rootNode.getNode("daycap").getInt()/7.0) * 9)+9);
 
         ItemStack stub = ItemStack.of(ItemTypes.GLASS_PANE, 1);
-        stub.offer(Keys.DYE_COLOR, DyeColors.GREEN);
+        ItemStack colorStub = ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1);
         stub.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-stub")));
+        ItemStack redstub = colorStub.copy();
+        redstub = ItemStack.builder().fromContainer(redstub.toContainer().set(DataQuery.of("UnsafeDamage"), 14)).build();
+        ItemStack blackstub = colorStub.copy();
+        blackstub = ItemStack.builder().fromContainer(blackstub.toContainer().set(DataQuery.of("UnsafeDamage"), 15)).build();
         ItemStack button = parseItem(rootNode.getNode("button").getString());
 
         InventoryArchetype archetype = InventoryArchetype.builder()
@@ -73,28 +78,46 @@ public class GuiUtil {
         Iterator inventoryIt = inventory.slots().iterator();
         int i = 1;
         int j = 1;
-        Slot slot = null;
+        Slot slot;
         while (inventoryIt.hasNext()) {
             slot = (Slot) inventoryIt.next();
-            if (i % 9 == 0 || (i - 1) % 9 == 0) {
-                slot.offer(stub.copy());
-            } else {
-                if (iconMap.get(String.valueOf(j)) == null) {
-                    j++;
-                } else {
-                    ItemStack is = iconMap.get(String.valueOf(j));
-                    is.setQuantity(j);
-                    slot.offer(is);
-                    j++;
-                }
+            if(i==inventorySize-1){
+                ItemStack stack = parseItem("minecraft:end_crystal");
+                stack.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-take")));
+                slot.poll();
+                slot.offer(stack.copy());
+                i++;
+                continue;
             }
-            i++;
-        }
-        if(slot!=null){
-            ItemStack stack = parseItem("minecraft:end_crystal");
-            stack.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-take")));
-            slot.poll();
-            slot.offer(stack.copy());
+            if(i>=inventorySize-8){
+                slot.poll();
+                slot.offer(blackstub.copy());
+                i++;
+                continue;
+            }
+            if (i % 9 == 0 || (i - 1) % 9 == 0) {
+                slot.offer(redstub.copy());
+                i++;
+                continue;
+            }
+            if(i==inventorySize-1){
+                ItemStack stack = button;
+                stack.offer(Keys.DISPLAY_NAME, Text.of(trans("rewards-inventory-take")));
+                slot.poll();
+                slot.offer(stack.copy());
+                i++;
+                continue;
+            }
+            if (iconMap.get(String.valueOf(j)) == null) {
+                j++;
+                i++;
+            } else {
+                ItemStack is = iconMap.get(String.valueOf(j));
+                is.setQuantity(j);
+                slot.offer(is);
+                j++;
+                i++;
+            }
         }
 
         player.openInventory(inventory);
