@@ -1,5 +1,6 @@
 package ru.skyfire.zeta.dailyrewards.listeners;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
@@ -9,6 +10,8 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import ru.skyfire.zeta.dailyrewards.DailyRewards;
 import ru.skyfire.zeta.dailyrewards.database.SqliteEntry;
 import ru.skyfire.zeta.dailyrewards.util.GuiUtil;
+
+import java.util.concurrent.TimeUnit;
 
 import static ru.skyfire.zeta.dailyrewards.DailyRewards.logger;
 
@@ -33,7 +36,14 @@ public class Listeners {
         }
         if (DailyRewards.getInst().getRootDefNode().getNode("show-rewards-on-join").getBoolean(true)){
             if (sqlite.getStatus(player.getUniqueId())==0 && player.hasPermission("dailyrewards.base")){
-                GuiUtil.showRewards(player);
+                int delay = DailyRewards.getInst().getRootDefNode().getNode("guiShowDelay").getInt(0);
+                Sponge.getScheduler().createTaskBuilder()
+                        .delay(delay, TimeUnit.SECONDS)
+                        .execute(t->{
+                            GuiUtil.showRewards(player);
+                            t.cancel();
+                        })
+                        .submit(DailyRewards.getInst());
             }
         }
 
