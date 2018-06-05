@@ -57,6 +57,6 @@ public class MoneyReward extends Reward {
         Currency curr = eco.getDefaultCurrency();
         UniqueAccount account = eco.getOrCreateAccount(player.getUniqueId()).get();
         account.deposit(curr, money, Cause.of(EventContext.builder().build(), DailyRewards.getInst()));
-        player.sendMessage(Text.of(TextColors.AQUA, Text.of("Ежедневная награда: "+getAmount())));
+        player.sendMessage(Text.of(TextColors.AQUA, Text.of("Your received money: "+getAmount())));
     }
 }
