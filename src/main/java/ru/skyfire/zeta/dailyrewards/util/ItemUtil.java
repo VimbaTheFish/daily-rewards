@@ -11,6 +11,8 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -195,5 +197,24 @@ public class ItemUtil {
 
     public static boolean isItemStacksSimilar(ItemStack stack1, ItemStack stack2){
         return stack1.getType().equals(stack2.getType());
+    }
+
+    public static String getCustomData(ItemStack itemStack, String key){
+        if(itemStack==null){
+            return "0";
+        }
+        DataContainer container = itemStack.toContainer();
+        String value = container.get(DataQuery.of('.', "UnsafeData."+key)).orElse(0).toString();
+        return value;
+    }
+
+    public static ItemStack setCustomData(ItemStack itemStack, String inKey, Object value) {
+        Map<String, Object> extraMap = new HashMap<>();
+        extraMap.put(inKey, value);
+        DataContainer container = itemStack.toContainer();
+        for(String key : extraMap.keySet()) {
+            container.set(DataQuery.of('.', "UnsafeData."+key), extraMap.get(key));
+        }
+        return ItemStack.builder().fromContainer(container).build();
     }
 }

@@ -9,6 +9,7 @@ import ru.skyfire.zeta.dailyrewards.reward.CmdReward;
 import ru.skyfire.zeta.dailyrewards.reward.ItemReward;
 import ru.skyfire.zeta.dailyrewards.reward.MoneyReward;
 import ru.skyfire.zeta.dailyrewards.reward.Reward;
+import ru.skyfire.zeta.dailyrewards.util.ItemUtil;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -80,6 +81,10 @@ public class RewardDeserializer {
                     lore.add(q, Text.of(days.getNode(a, "icon", "lore").getChildrenMap().get(String.valueOf(q+1)).getString().replace("&","§")));
                     q++;
                 }
+                for (Object b : days.getNode(a, "icon", "nbt").getChildrenMap().keySet()){
+                    stack=ItemUtil.setCustomData(stack, String.valueOf(b), String.valueOf(days.getNode(a, "icon", "nbt", b).getString()));
+                }
+
                 stack.offer(Keys.ITEM_LORE, lore);
             }
             bufIconMap.put(a, stack != null ? stack.copy() : parseItem("minecraft:dirt"));
